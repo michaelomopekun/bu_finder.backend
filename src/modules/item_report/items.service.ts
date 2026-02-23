@@ -1,5 +1,5 @@
-import { Injectable, Inject, NotFoundException, ForbiddenException } from '@nestjs/common';
-import { CreateItemData, ItemCountByType, ItemData, ITEMS_REPOSITORY, type IItemsRepository, } from './interface/item-repository.interface';
+import { Injectable, Inject, NotFoundException, ForbiddenException, BadRequestException } from '@nestjs/common';
+import { CreateItemData, ItemCountByType, ItemData, ITEMS_REPOSITORY, type IItemsRepository, SearchItemsParams, SearchItemResult } from './interface/item-repository.interface';
 import { IItemsService } from './interface/item-service.interface';
 import { itemStatuses } from 'src/db/schema';
 
@@ -56,5 +56,21 @@ export class ItemsService implements IItemsService {
         throw new ForbiddenException('Only PENDING items can be rejected');
         }
         return this.itemsRepository.updateStatus(id, itemStatuses.REJECTED);
+    }
+
+    async searchItems(params: SearchItemsParams): Promise<SearchItemResult[]> {
+        if (!params.query || params.query.trim().length === 0) {
+            throw new BadRequestException('Search query cannot be empty');
+        }
+
+        if (params.limit < 1 || params.limit > 100) {
+            throw new BadRequestException('Limit must be between 1 and 100');
+        }
+
+        if (params.offset < 0) {
+            throw new BadRequestException('Offset cannot be negative');
+        }
+
+        return this.itemsRepository.searchItems(params);
     }
 }
