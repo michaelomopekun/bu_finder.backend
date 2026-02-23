@@ -1,10 +1,11 @@
 import { Injectable, Inject } from '@nestjs/common';
-import { eq, count, sql } from 'drizzle-orm';
+import { eq, count, sql, and, or } from 'drizzle-orm';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { DRIZZLE } from '../../db/db.module';
 import * as schema from '../../db/schema';
 import { items } from '../../db/schema/index';
-import { IItemsRepository, CreateItemData, ItemData, ItemCountByType } from './interface/item-repository.interface';
+import { IItemsRepository, CreateItemData, ItemData, ItemCountByType, SearchItemsParams, SearchItemResult } from './interface/item-repository.interface';
+import { itemStatuses } from 'src/db/schema';
 
 @Injectable()
 export class ItemsRepository implements IItemsRepository {
@@ -84,7 +85,7 @@ export class ItemsRepository implements IItemsRepository {
 
     async updateStatus(
         id: string,
-        status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'CLAIMED',
+        status: itemStatuses,
     ): Promise<ItemData> {
         const [updatedItem] = await this.db
         .update(items)
@@ -93,5 +94,57 @@ export class ItemsRepository implements IItemsRepository {
         .returning();
 
         return updatedItem as ItemData;
+    }
+
+    async searchItems(params: SearchItemsParams): Promise<SearchItemResult[]> {
+        const { query, type, location, category, limit, offset } = params;
+
+        // Weighted matching formula via raw SQL
+        const matchScoreExpression = sql<number>`
+            (similarity(${items.title}, ${query}) * 0.4 +
+             similarity(${items.description}, ${query}) * 0.35 +
+             similarity(${items.category}, ${query}) * 0.15 +
+             similarity(${items.location}, ${query}) * 0.10)
+        `;
+
+        let whereConditions = and(
+            eq(items.status, itemStatuses.APPROVED),
+            sql`${matchScoreExpression} > 0.5`
+        );
+
+        // Add optional filters
+        if (type) {
+            whereConditions = and(whereConditions, eq(items.type, type));
+        }
+        if (location) {
+            whereConditions = and(whereConditions, eq(items.location, location));
+        }
+        if (category) {
+            whereConditions = and(whereConditions, eq(items.category, category));
+        }
+
+        const results = await this.db
+            .select({
+                id: items.id,
+                title: items.title,
+                description: items.description,
+                category: items.category,
+                location: items.location,
+                type: items.type,
+                status: items.status,
+                imageUrl: items.imageUrl,
+                submittedBy: items.submittedBy,
+                dateReported: items.dateReported,
+                createdAt: items.createdAt,
+                updatedAt: items.updatedAt,
+                matchScore: matchScoreExpression,
+            })
+            .from(items)
+            .where(whereConditions)
+            .orderBy(matchScoreExpression)
+            .limit(limit)
+            .offset(offset);
+
+        return results as SearchItemResult[];
     }
 }
