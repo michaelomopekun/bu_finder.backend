@@ -30,6 +30,19 @@ export interface ItemCountByType {
   found: number;
 }
 
+export interface SearchItemsParams {
+  query: string;
+  type?: itemTypes;
+  location?: string;
+  category?: string;
+  limit: number;
+  offset: number;
+}
+
+export interface SearchItemResult extends ItemData {
+  matchScore: number;
+}
+
 export interface IItemsRepository {
     create(data: CreateItemData): Promise<ItemData>;
     findAll(): Promise<ItemData[]>;
@@ -38,6 +51,7 @@ export interface IItemsRepository {
     getCountByUserId(userId: string): Promise<ItemCountByType>;
     updateStatus(id: string, status: itemStatuses): Promise<ItemData>;
     delete(id: string): Promise<void>;
+    searchItems(params: SearchItemsParams): Promise<SearchItemResult[]>;
 }
 
 export const ITEMS_REPOSITORY = Symbol('ITEMS_REPOSITORY');
