@@ -13,6 +13,7 @@ import {
   HttpStatus,
   Inject,
   BadRequestException,
+  Logger,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiConsumes } from '@nestjs/swagger';
@@ -39,6 +40,9 @@ export class ItemsController {
   @ApiOperation({ summary: 'Search items with weighted fuzzy matching' })
   @ApiResponse({ status: 200, description: 'Search completed successfully', type: SearchItemsResponseDto })
   async searchItems(@Query() query: SearchItemsQueryDto): Promise<SearchItemsResponseDto> {
+
+    Logger.log(`Search query: ${JSON.stringify(query)}`, 'ItemsController.searchItems');
+
     const results = await this.itemsService.searchItems({
       query: query.q,
       type: query.type,
@@ -47,6 +51,8 @@ export class ItemsController {
       limit: query.limit,
       offset: query.offset,
     });
+
+    Logger.log(`Search results: ${JSON.stringify(results)}`, 'ItemsController.searchItems');
 
     return {
       status: responseStatus.SUCCESS,

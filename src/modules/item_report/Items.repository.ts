@@ -109,7 +109,7 @@ export class ItemsRepository implements IItemsRepository {
 
         let whereConditions = and(
             eq(items.status, itemStatuses.APPROVED),
-            sql`${matchScoreExpression} > 0.2`
+            sql`${matchScoreExpression} > 0.1`
         );
 
         // Add optional filters
