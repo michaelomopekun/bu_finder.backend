@@ -1,13 +1,17 @@
-import { Injectable, Inject, NotFoundException, ForbiddenException, BadRequestException } from '@nestjs/common';
+import { Injectable, Inject, NotFoundException, ForbiddenException, BadRequestException, Logger } from '@nestjs/common';
 import { CreateItemData, ItemCountByType, ItemData, ITEMS_REPOSITORY, type IItemsRepository, SearchItemsParams, SearchItemResult } from './interface/item-repository.interface';
 import { IItemsService } from './interface/item-service.interface';
 import { itemStatuses } from 'src/db/schema';
+import { MatchingService } from './matching.service';
 
 @Injectable()
 export class ItemsService implements IItemsService {
+  private readonly logger = new Logger(ItemsService.name);
+
   constructor(
     @Inject(ITEMS_REPOSITORY)
     private readonly itemsRepository: IItemsRepository,
+    private readonly matchingService: MatchingService,
   ) {}
 
     async getUserItemCount(userId: string): Promise<ItemCountByType> {
@@ -47,7 +51,14 @@ export class ItemsService implements IItemsService {
         if (item.status !== 'PENDING') {
         throw new ForbiddenException('Only PENDING items can be approved');
         }
-        return this.itemsRepository.updateStatus(id, itemStatuses.APPROVED);
+        const approvedItem = await this.itemsRepository.updateStatus(id, itemStatuses.APPROVED);
+        
+        // Trigger async matching (fire-and-forget)
+        this.matchingService.matchItem(id, approvedItem.type as 'LOST' | 'FOUND').catch((error) => {
+            this.logger.error(`Error triggering async matching for item ${id}:`, error);
+        });
+
+        return approvedItem;
     }
 
     async rejectItem(id: string): Promise<ItemData> {
