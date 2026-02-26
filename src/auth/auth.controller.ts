@@ -52,7 +52,8 @@ export class AuthController {
         accessToken: result.accessToken!,
       }
     };
-  }
+  }  
+  
 
   @Get('profile')
   @HttpCode(HttpStatus.OK)
@@ -65,6 +66,21 @@ export class AuthController {
       status: responseStatus.SUCCESS,
       message: 'Profile retrieved successfully',
       data: await this.authService.getProfile(userId),
+    };
+  }
+
+  @Post('admin-login')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Login as an admin and get JWT token' })
+  @ApiResponse({ status: 200, description: 'Admin login successful', type: LoginResponseDto })
+  async adminLogin(@Body() dto: LoginDto): Promise<LoginResponseDto> {
+    const result = await this.authService.adminLogin(dto);
+    return {
+      status: responseStatus.SUCCESS,
+      message: 'Admin Login successful',
+      data: {
+        accessToken: result.accessToken!,
+      }
     };
   }
 }

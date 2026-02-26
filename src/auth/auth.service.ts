@@ -79,6 +79,34 @@ export class AuthService implements IAuthService {
     };
   }
 
+  async adminLogin(dto: LoginDto) {
+
+    
+    // Find user by email
+    const user = await this.authRepository.findByEmail(dto.email);
+    if (!user) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    // validate role
+    if(user.role !== 'ADMIN'){
+      throw new UnauthorizedException('Invalid credentials')
+    }
+
+    // Compare password
+    const isPasswordValid = await bcrypt.compare(dto.password, user.password);
+    if (!isPasswordValid) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    // Generate token
+    const accessToken = this.generateToken(user.id, user.email, user.role);
+
+    return {
+        accessToken,
+    };
+  }
+
   async getProfile(userId: string) {
     const user = await this.authRepository.findById(userId);
     if (!user) {
