@@ -6,9 +6,10 @@ import { MatchingService } from './matching.service';
 import { ITEMS_REPOSITORY, ITEMS_SERVICE } from './interface';
 import { CloudinaryModule } from 'src/common/cloudinary/cloudinary.module';
 import { NotificationsModule } from '../notifications/notifications.module';
+import { EmailModule } from 'src/common/email/email.module';
 
 @Module({
-  imports: [CloudinaryModule, NotificationsModule],
+  imports: [CloudinaryModule, NotificationsModule, EmailModule],
   controllers: [ItemsController],
   providers: [
     ItemsService,
