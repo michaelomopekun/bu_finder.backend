@@ -51,7 +51,7 @@ export class MatchingService {
       const matches = await this.itemsRepository.searchItems(searchParams);
 
       // Filter for matches with score >= 0.5
-      const qualifiedMatches = matches.filter((match) => match.matchScore >= 0.5);
+      const qualifiedMatches = matches.filter((match) => match.matchScore >= 0.1);
 
       this.logger.log(
         `Found ${qualifiedMatches.length} matches for item ${itemId} (${itemType})`,
