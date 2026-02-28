@@ -52,6 +52,9 @@ export interface IItemsRepository {
     updateStatus(id: string, status: itemStatuses): Promise<ItemData>;
     delete(id: string): Promise<void>;
     searchItems(params: SearchItemsParams): Promise<SearchItemResult[]>;
+    findRecentlyLostItems(limit: number, offset: number): Promise<ItemData[]>;
+    findRecentlyFoundItems(limit: number, offset: number): Promise<ItemData[]>;
+    countApprovedItemsByType(type: itemTypes): Promise<number>;
 }
 
 export const ITEMS_REPOSITORY = Symbol('ITEMS_REPOSITORY');

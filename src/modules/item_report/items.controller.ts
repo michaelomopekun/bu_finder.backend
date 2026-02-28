@@ -16,8 +16,8 @@ import {
   Logger,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiConsumes } from '@nestjs/swagger';
-import { CreateItemDto, CreateItemResponseDto, GetItemCountResponseDto, GetItemsResponseDto, ItemResponseDto } from './dto/items.dto';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiConsumes, ApiQuery } from '@nestjs/swagger';
+import { CreateItemDto, CreateItemResponseDto, GetItemCountResponseDto, GetItemsResponseDto, ItemResponseDto, RecentlyItemsQueryDto, GetRecentItemsResponseDto } from './dto/items.dto';
 import { SearchItemsQueryDto, SearchItemsResponseDto } from './dto/search-items.dto';
 import { JwtAuthGuard, RolesGuard } from '../../auth/guards';
 import { Roles } from '../../auth/decorators/roles.decorator';
@@ -61,6 +61,130 @@ export class ItemsController {
       pagination: {
         limit: query.limit,
         offset: query.offset,
+      },
+    };
+  }
+
+  @Get('recently-lost')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Get recently approved lost items' })
+  @ApiQuery({
+    name: 'limit',
+    type: Number,
+    required: false,
+    description: 'Number of items to return (1-100, default: 20)',
+    example: 20,
+  })
+  @ApiQuery({
+    name: 'offset',
+    type: Number,
+    required: false,
+    description: 'Pagination offset (default: 0)',
+    example: 0,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Recently lost items retrieved successfully',
+    type: GetRecentItemsResponseDto,
+    example: {
+      status: 'success',
+      message: 'Recently lost items retrieved successfully',
+      data: [
+        {
+          id: '550e8400-e29b-41d4-a716-446655440000',
+          title: 'Lost iPhone 14 Pro',
+          description: 'Blue iPhone with cracked screen',
+          category: 'Electronics',
+          location: 'Library',
+          type: 'LOST',
+          status: 'APPROVED',
+          imageUrl: 'https://res.cloudinary.com/...',
+          submittedBy: '550e8400-e29b-41d4-a716-446655440001',
+          dateReported: '2026-02-26T10:30:00Z',
+          createdAt: '2026-02-26T10:30:00Z',
+          updatedAt: '2026-02-26T10:30:00Z',
+        },
+      ],
+      pagination: {
+        limit: 20,
+        offset: 0,
+        total: 42,
+      },
+    },
+  })
+  async getRecentlyLostItems(@Query() query: RecentlyItemsQueryDto): Promise<GetRecentItemsResponseDto> {
+    const { items, total } = await this.itemsService.getRecentlyLostItems(query.limit, query.offset);
+
+    return {
+      status: responseStatus.SUCCESS,
+      message: 'Recently lost items retrieved successfully',
+      data: items,
+      pagination: {
+        limit: query.limit,
+        offset: query.offset,
+        total,
+      },
+    };
+  }
+
+  @Get('recently-found')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Get recently approved found items' })
+  @ApiQuery({
+    name: 'limit',
+    type: Number,
+    required: false,
+    description: 'Number of items to return (1-100, default: 20)',
+    example: 20,
+  })
+  @ApiQuery({
+    name: 'offset',
+    type: Number,
+    required: false,
+    description: 'Pagination offset (default: 0)',
+    example: 0,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Recently found items retrieved successfully',
+    type: GetRecentItemsResponseDto,
+    example: {
+      status: 'success',
+      message: 'Recently found items retrieved successfully',
+      data: [
+        {
+          id: '550e8400-e29b-41d4-a716-446655440002',
+          title: 'Found Blue iPhone',
+          description: 'Found near the cafeteria',
+          category: 'Electronics',
+          location: 'Cafeteria',
+          type: 'FOUND',
+          status: 'APPROVED',
+          imageUrl: 'https://res.cloudinary.com/...',
+          submittedBy: '550e8400-e29b-41d4-a716-446655440003',
+          dateReported: '2026-02-26T14:20:00Z',
+          createdAt: '2026-02-26T14:20:00Z',
+          updatedAt: '2026-02-26T14:20:00Z',
+        },
+      ],
+      pagination: {
+        limit: 20,
+        offset: 0,
+        total: 28,
+      },
+    },
+  })
+  async getRecentlyFoundItems(@Query() query: RecentlyItemsQueryDto): Promise<GetRecentItemsResponseDto> {
+    const { items, total } = await this.itemsService.getRecentlyFoundItems(query.limit, query.offset);
+
+    return {
+      status: responseStatus.SUCCESS,
+      message: 'Recently found items retrieved successfully',
+      data: items,
+      pagination: {
+        limit: query.limit,
+        offset: query.offset,
+        total,
       },
     };
   }

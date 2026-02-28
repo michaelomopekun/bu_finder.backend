@@ -1,11 +1,11 @@
 import { Injectable, Inject } from '@nestjs/common';
-import { eq, count, sql, and, or } from 'drizzle-orm';
+import { eq, count, sql, and, or, desc } from 'drizzle-orm';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { DRIZZLE } from '../../db/db.module';
 import * as schema from '../../db/schema';
 import { items } from '../../db/schema/index';
 import { IItemsRepository, CreateItemData, ItemData, ItemCountByType, SearchItemsParams, SearchItemResult } from './interface/item-repository.interface';
-import { itemStatuses } from 'src/db/schema';
+import { itemStatuses, itemTypes } from 'src/db/schema';
 
 @Injectable()
 export class ItemsRepository implements IItemsRepository {
@@ -151,5 +151,53 @@ export class ItemsRepository implements IItemsRepository {
             .offset(offset);
 
         return results as SearchItemResult[];
+    }
+
+    async findRecentlyLostItems(limit: number, offset: number): Promise<ItemData[]> {
+        const recentLostItems = await this.db
+            .select()
+            .from(items)
+            .where(
+                and(
+                    eq(items.type, 'LOST'),
+                    eq(items.status, itemStatuses.APPROVED)
+                )
+            )
+            .orderBy(desc(items.createdAt))
+            .limit(limit)
+            .offset(offset);
+
+        return recentLostItems as ItemData[];
+    }
+
+    async findRecentlyFoundItems(limit: number, offset: number): Promise<ItemData[]> {
+        const recentFoundItems = await this.db
+            .select()
+            .from(items)
+            .where(
+                and(
+                    eq(items.type, 'FOUND'),
+                    eq(items.status, itemStatuses.APPROVED)
+                )
+            )
+            .orderBy(desc(items.createdAt))
+            .limit(limit)
+            .offset(offset);
+
+        return recentFoundItems as ItemData[];
+    }
+
+    async countApprovedItemsByType(type: itemTypes): Promise<number> {
+        const [result] = await this.db
+            .select({ total: count() })
+            .from(items)
+            .where(
+                and(
+                    eq(items.type, type),
+                    eq(items.status, itemStatuses.APPROVED)
+                )
+            );
+
+        return result?.total ?? 0;
     }
 }

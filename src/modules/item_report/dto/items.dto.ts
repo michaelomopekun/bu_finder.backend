@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsNotEmpty, IsEnum, IsOptional } from 'class-validator';
+import { IsString, IsNotEmpty, IsEnum, IsOptional, Min, Max, IsNumber } from 'class-validator';
+import { Type } from 'class-transformer';
 import { itemStatuses, itemTypes } from 'src/db/schema';
 
 export class CreateItemDto {
@@ -35,6 +36,31 @@ export class CreateItemDto {
   })
   @IsOptional()
   image?: any; // File upload from multipart/form-data
+}
+
+export class RecentlyItemsQueryDto {
+  @ApiProperty({
+    example: 20,
+    required: false,
+    description: 'Number of items to return (1-100, default: 20)',
+  })
+  @Type(() => Number)
+  @IsNumber()
+  @Min(1, { message: 'Limit must be at least 1' })
+  @Max(100, { message: 'Limit cannot exceed 100' })
+  @IsOptional()
+  limit: number = 20;
+
+  @ApiProperty({
+    example: 0,
+    required: false,
+    description: 'Pagination offset (default: 0)',
+  })
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0, { message: 'Offset cannot be negative' })
+  @IsOptional()
+  offset: number = 0;
 }
 
 export class ItemResponseDto {
@@ -95,6 +121,27 @@ export class GetItemsResponseDto {
 
   @ApiProperty({ type: [ItemResponseDto] })
   data: ItemResponseDto[];
+}
+
+export class GetRecentItemsResponseDto {
+  @ApiProperty({ example: 'success', enum: ['success', 'error'] })
+  status: string;
+
+  @ApiProperty({ example: 'Recently lost items retrieved successfully' })
+  message: string;
+
+  @ApiProperty({ type: [ItemResponseDto] })
+  data: ItemResponseDto[];
+
+  @ApiProperty({
+    type: Object,
+    example: { limit: 20, offset: 0, total: 42 },
+  })
+  pagination: {
+    limit: number;
+    offset: number;
+    total: number;
+  };
 }
 
 export class GetItemCountResponseDto {

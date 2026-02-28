@@ -84,4 +84,34 @@ export class ItemsService implements IItemsService {
 
         return this.itemsRepository.searchItems(params);
     }
+
+    async getRecentlyLostItems(limit: number, offset: number): Promise<{ items: ItemData[]; total: number }> {
+        if (limit < 1 || limit > 100) {
+            throw new BadRequestException('Limit must be between 1 and 100');
+        }
+
+        if (offset < 0) {
+            throw new BadRequestException('Offset cannot be negative');
+        }
+
+        const items = await this.itemsRepository.findRecentlyLostItems(limit, offset);
+        const total = await this.itemsRepository.countApprovedItemsByType('LOST' as any);
+
+        return { items, total };
+    }
+
+    async getRecentlyFoundItems(limit: number, offset: number): Promise<{ items: ItemData[]; total: number }> {
+        if (limit < 1 || limit > 100) {
+            throw new BadRequestException('Limit must be between 1 and 100');
+        }
+
+        if (offset < 0) {
+            throw new BadRequestException('Offset cannot be negative');
+        }
+
+        const items = await this.itemsRepository.findRecentlyFoundItems(limit, offset);
+        const total = await this.itemsRepository.countApprovedItemsByType('FOUND' as any);
+
+        return { items, total };
+    }
 }
