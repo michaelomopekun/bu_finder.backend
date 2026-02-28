@@ -114,4 +114,19 @@ export class ItemsService implements IItemsService {
 
         return { items, total };
     }
+
+    async getPendingItems(limit: number, offset: number): Promise<{ items: ItemData[]; total: number }> {
+        if (limit < 1 || limit > 100) {
+            throw new BadRequestException('Limit must be between 1 and 100');
+        }
+
+        if (offset < 0) {
+            throw new BadRequestException('Offset cannot be negative');
+        }
+
+        const items = await this.itemsRepository.findPendingItems(limit, offset);
+        const total = await this.itemsRepository.countPendingItems();
+
+        return { items, total };
+    }
 }

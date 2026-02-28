@@ -200,4 +200,25 @@ export class ItemsRepository implements IItemsRepository {
 
         return result?.total ?? 0;
     }
+
+    async findPendingItems(limit: number, offset: number): Promise<ItemData[]> {
+        const pendingItems = await this.db
+            .select()
+            .from(items)
+            .where(eq(items.status, itemStatuses.PENDING))
+            .orderBy(desc(items.createdAt))
+            .limit(limit)
+            .offset(offset);
+
+        return pendingItems as ItemData[];
+    }
+
+    async countPendingItems(): Promise<number> {
+        const [result] = await this.db
+            .select({ total: count() })
+            .from(items)
+            .where(eq(items.status, itemStatuses.PENDING));
+
+        return result?.total ?? 0;
+    }
 }

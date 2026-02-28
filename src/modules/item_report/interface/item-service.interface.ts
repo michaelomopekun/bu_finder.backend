@@ -12,6 +12,7 @@ export interface IItemsService {
   searchItems(params: SearchItemsParams): Promise<SearchItemResult[]>;
   getRecentlyLostItems(limit: number, offset: number): Promise<{ items: ItemData[]; total: number }>;
   getRecentlyFoundItems(limit: number, offset: number): Promise<{ items: ItemData[]; total: number }>;
+  getPendingItems(limit: number, offset: number): Promise<{ items: ItemData[]; total: number }>;
 }
 
 export const ITEMS_SERVICE = Symbol('ITEMS_SERVICE');

@@ -55,6 +55,8 @@ export interface IItemsRepository {
     findRecentlyLostItems(limit: number, offset: number): Promise<ItemData[]>;
     findRecentlyFoundItems(limit: number, offset: number): Promise<ItemData[]>;
     countApprovedItemsByType(type: itemTypes): Promise<number>;
+    findPendingItems(limit: number, offset: number): Promise<ItemData[]>;
+    countPendingItems(): Promise<number>;
 }
 
 export const ITEMS_REPOSITORY = Symbol('ITEMS_REPOSITORY');

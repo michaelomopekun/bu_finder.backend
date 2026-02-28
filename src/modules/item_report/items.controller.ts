@@ -35,6 +35,71 @@ export class ItemsController {
     private readonly cloudinaryService: CloudinaryService,
   ) {}
 
+  @Get('admin/pending')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN')
+  @ApiBearerAuth()
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Admin: Get pending item reports awaiting approval' })
+  @ApiQuery({
+    name: 'limit',
+    type: Number,
+    required: false,
+    description: 'Number of items to return (1-100, default: 20)',
+    example: 20,
+  })
+  @ApiQuery({
+    name: 'offset',
+    type: Number,
+    required: false,
+    description: 'Pagination offset (default: 0)',
+    example: 0,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Pending items retrieved successfully',
+    type: GetRecentItemsResponseDto,
+    example: {
+      status: 'success',
+      message: 'Pending item reports retrieved successfully',
+      data: [
+        {
+          id: '550e8400-e29b-41d4-a716-446655440000',
+          title: 'Lost iPhone 14 Pro',
+          description: 'Blue iPhone with cracked screen, last seen at Library',
+          category: 'Electronics',
+          location: 'Library',
+          type: 'LOST',
+          status: 'PENDING',
+          imageUrl: 'https://res.cloudinary.com/...',
+          submittedBy: '550e8400-e29b-41d4-a716-446655440001',
+          dateReported: '2026-02-28T08:15:00Z',
+          createdAt: '2026-02-28T08:15:00Z',
+          updatedAt: '2026-02-28T08:15:00Z',
+        },
+      ],
+      pagination: {
+        limit: 20,
+        offset: 0,
+        total: 5,
+      },
+    },
+  })
+  async getPendingItemReports(@Query() query: RecentlyItemsQueryDto): Promise<GetRecentItemsResponseDto> {
+    const { items, total } = await this.itemsService.getPendingItems(query.limit, query.offset);
+
+    return {
+      status: responseStatus.SUCCESS,
+      message: 'Pending item reports retrieved successfully',
+      data: items,
+      pagination: {
+        limit: query.limit,
+        offset: query.offset,
+        total,
+      },
+    };
+  }
+
   @Get('search')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Search items with weighted fuzzy matching' })
