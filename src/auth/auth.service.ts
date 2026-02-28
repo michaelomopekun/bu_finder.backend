@@ -65,6 +65,11 @@ export class AuthService implements IAuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
+    // Check role
+    if( user.role !== "STUDENT") {
+      throw new UnauthorizedException("Invalid credentials")
+    }
+
     // Compare password
     const isPasswordValid = await bcrypt.compare(dto.password, user.password);
     if (!isPasswordValid) {
