@@ -57,6 +57,8 @@ export interface IItemsRepository {
     countApprovedItemsByType(type: itemTypes): Promise<number>;
     findPendingItems(limit: number, offset: number): Promise<ItemData[]>;
     countPendingItems(): Promise<number>;
+    countAll(): Promise<number>;
+    countByStatus(status: itemStatuses): Promise<number>;
 }
 
 export const ITEMS_REPOSITORY = Symbol('ITEMS_REPOSITORY');

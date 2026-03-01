@@ -9,10 +9,12 @@ export interface IItemsService {
   getUserItemCount(userId: string): Promise<ItemCountByType>;
   approveItem(id: string): Promise<ItemData>;
   rejectItem(id: string): Promise<ItemData>;
+  updateStatus(id: string, status: any): Promise<ItemData>;
   searchItems(params: SearchItemsParams): Promise<SearchItemResult[]>;
   getRecentlyLostItems(limit: number, offset: number): Promise<{ items: ItemData[]; total: number }>;
   getRecentlyFoundItems(limit: number, offset: number): Promise<{ items: ItemData[]; total: number }>;
   getPendingItems(limit: number, offset: number): Promise<{ items: ItemData[]; total: number }>;
+  getAdminMetrics(): Promise<{ totalReports: number; pendingApprovals: number; resolvedCases: number }>;
 }
 
 export const ITEMS_SERVICE = Symbol('ITEMS_SERVICE');

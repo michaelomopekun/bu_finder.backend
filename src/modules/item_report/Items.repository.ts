@@ -221,4 +221,21 @@ export class ItemsRepository implements IItemsRepository {
 
         return result?.total ?? 0;
     }
+
+    async countAll(): Promise<number> {
+        const [result] = await this.db
+            .select({ total: count() })
+            .from(items);
+
+        return result?.total ?? 0;
+    }
+
+    async countByStatus(status: itemStatuses): Promise<number> {
+        const [result] = await this.db
+            .select({ total: count() })
+            .from(items)
+            .where(eq(items.status, status));
+
+        return result?.total ?? 0;
+    }
 }

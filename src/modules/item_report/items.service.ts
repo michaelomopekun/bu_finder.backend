@@ -129,4 +129,17 @@ export class ItemsService implements IItemsService {
 
         return { items, total };
     }
+
+    async updateStatus(id: string, status: any): Promise<ItemData> {
+        const item = await this.getItemById(id);
+        return this.itemsRepository.updateStatus(id, status);
+    }
+
+    async getAdminMetrics(): Promise<{ totalReports: number; pendingApprovals: number; resolvedCases: number }> {
+        const totalReports = await this.itemsRepository.countAll();
+        const pendingApprovals = await this.itemsRepository.countPendingItems();
+        const resolvedCases = await this.itemsRepository.countByStatus('CLAIMED' as any);
+
+        return { totalReports, pendingApprovals, resolvedCases };
+    }
 }
