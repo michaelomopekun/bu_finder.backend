@@ -397,4 +397,20 @@ export class ItemsController {
       data: item,
     };
   }
+
+  @Get('admin/metrics')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN')
+  @ApiBearerAuth()
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Admin: Get dashboard metrics (total reports, pending approvals, resolved cases)' })
+  @ApiResponse({ status: 200, description: 'Admin metrics retrieved successfully' })
+  async getAdminMetrics(): Promise<any> {
+    const metrics = await this.itemsService.getAdminMetrics();
+    return {
+      status: responseStatus.SUCCESS,
+      message: 'Admin metrics retrieved successfully',
+      data: metrics,
+    };
+  }
 }

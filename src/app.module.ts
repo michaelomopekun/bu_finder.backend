@@ -6,6 +6,7 @@ import { DatabaseModule } from './db/db.module';
 import { AuthModule } from './auth/auth.module';
 import { ItemsModule } from './modules/item_report/items.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
+import { ClaimsModule } from './modules/claims/claims.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { NotificationsModule } from './modules/notifications/notifications.modul
     AuthModule,
     ItemsModule,
     NotificationsModule,
+    ClaimsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
