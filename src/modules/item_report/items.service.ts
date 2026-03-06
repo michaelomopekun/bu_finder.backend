@@ -142,4 +142,12 @@ export class ItemsService implements IItemsService {
 
         return { totalReports, pendingApprovals, resolvedCases };
     }
+
+    async findMatchesForItem(id: string): Promise<any[]> {
+        const item = await this.getItemById(id);
+        if (item.status !== 'APPROVED') {
+            throw new BadRequestException('Only APPROVED items can be matched');
+        }
+        return this.matchingService.findMatchesForItem(id);
+    }
 }

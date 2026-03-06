@@ -379,6 +379,28 @@ export class ItemsController {
     };
   }
 
+  @Get(':id/matches')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Find potential matches for an item (uses AI if item has image, fuzzy otherwise)' })
+  @ApiResponse({ status: 200, description: 'Matches found successfully' })
+  async findMatchesForItem(@Param('id') id: string): Promise<any> {
+    Logger.log(`Finding matches for item id="${id}"`, 'ItemsController.findMatchesForItem');
+
+    const matches = await this.itemsService.findMatchesForItem(id);
+
+    Logger.log(`Found ${matches.length} matches for item id="${id}"`, 'ItemsController.findMatchesForItem');
+
+    return {
+      status: responseStatus.SUCCESS,
+      message: matches.length > 0
+        ? `Found ${matches.length} potential match${matches.length === 1 ? '' : 'es'}`
+        : 'No matches found',
+      data: matches,
+    };
+  }
+
   @Get(':id')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Get item by ID' })

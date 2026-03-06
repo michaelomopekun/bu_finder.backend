@@ -7,9 +7,10 @@ import { ITEMS_REPOSITORY, ITEMS_SERVICE } from './interface';
 import { CloudinaryModule } from 'src/common/cloudinary/cloudinary.module';
 import { NotificationsModule } from '../notifications/notifications.module';
 import { EmailModule } from 'src/common/email/email.module';
+import { GeminiModule } from 'src/common/gemini/gemini.module';
 
 @Module({
-  imports: [CloudinaryModule, NotificationsModule, EmailModule],
+  imports: [CloudinaryModule, NotificationsModule, EmailModule, GeminiModule],
   controllers: [ItemsController],
   providers: [
     ItemsService,

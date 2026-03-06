@@ -15,6 +15,7 @@ export interface IItemsService {
   getRecentlyFoundItems(limit: number, offset: number): Promise<{ items: ItemData[]; total: number }>;
   getPendingItems(limit: number, offset: number): Promise<{ items: ItemData[]; total: number }>;
   getAdminMetrics(): Promise<{ totalReports: number; pendingApprovals: number; resolvedCases: number }>;
+  findMatchesForItem(id: string): Promise<any[]>;
 }
 
 export const ITEMS_SERVICE = Symbol('ITEMS_SERVICE');
