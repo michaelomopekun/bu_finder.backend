@@ -14,6 +14,9 @@ async function bootstrap() {
     }),
   );
 
+const cors = require('cors');
+app.use(cors({ origin: 'http://localhost:3000' }));
+
 
   const config = new DocumentBuilder()
     .setTitle('BU Finder API')
