@@ -5,7 +5,7 @@ import type { INotificationsService } from '../notifications/interface';
 import { NOTIFICATIONS_SERVICE } from '../notifications/interface';
 import type { ItemData } from '../item_report/interface/item-repository.interface';
 import { EmailService } from '../../common/email/email.service';
-import { AiMatchingService, MatchCandidate } from '../../common/gemini/gemini.service';
+import { AiMatchingService, MatchCandidate, MatchAreas } from '../../common/gemini/gemini.service';
 import { eq } from 'drizzle-orm';
 import { Inject as NestInject } from '@nestjs/common';
 import { DRIZZLE } from '../../db/db.module';
@@ -18,6 +18,7 @@ export interface MatchResultItem {
   score: number;
   reasoning: string;
   matchMethod: 'groq-ai' | 'fuzzy-similarity';
+  matchAreas: MatchAreas;
 }
 
 @Injectable()
@@ -167,6 +168,7 @@ export class MatchingService {
             score: match.score,
             reasoning: match.reasoning,
             matchMethod: 'groq-ai',
+            matchAreas: match.matchAreas,
           });
         }
       }
@@ -188,6 +190,13 @@ export class MatchingService {
         score: match.matchScore,
         reasoning: 'Matched by text similarity',
         matchMethod: 'fuzzy-similarity' as const,
+        matchAreas: {
+          title: true,
+          description: match.matchScore >= 0.5,
+          category: false,
+          location: false,
+          image: false,
+        },
       }))
       .sort((a, b) => b.score - a.score);
   }

@@ -11,10 +11,19 @@ export interface MatchCandidate {
   imageUrl: string | null;
 }
 
+export interface MatchAreas {
+  title: boolean;
+  description: boolean;
+  category: boolean;
+  location: boolean;
+  image: boolean;
+}
+
 export interface AiMatchResult {
   candidateId: string;
   score: number;
   reasoning: string;
+  matchAreas: MatchAreas;
 }
 
 @Injectable()
@@ -202,7 +211,14 @@ SCORING RULES:
 - Score 0.0 for clearly unrelated items
 
 Respond with a JSON object containing a "matches" array:
-{"matches": [{"candidateId": "<uuid>", "score": <number>, "reasoning": "<brief explanation>"}]}
+{"matches": [{"candidateId": "<uuid>", "score": <number>, "reasoning": "<brief explanation>", "matchAreas": {"title": <boolean>, "description": <boolean>, "category": <boolean>, "location": <boolean>, "image": <boolean>}}]}
+
+The "matchAreas" object indicates which fields matched between the source and candidate:
+- "title": true if the item names/titles refer to the same thing
+- "description": true if the physical descriptions match (color, brand, serial number, etc.)
+- "category": true if both items are in the same category
+- "location": true if the items were reported in the same or nearby location
+- "image": true if the images visually match (set false if no images available)
 
 If no candidates match at all, return: {"matches": []}
 
@@ -259,6 +275,13 @@ CRITICAL: Output ONLY the raw JSON object. Do NOT include any explanation, analy
           candidateId: item.candidateId,
           score: Math.round(item.score * 100) / 100,
           reasoning: item.reasoning || '',
+          matchAreas: {
+            title: !!item.matchAreas?.title,
+            description: !!item.matchAreas?.description,
+            category: !!item.matchAreas?.category,
+            location: !!item.matchAreas?.location,
+            image: !!item.matchAreas?.image,
+          },
         }));
     } catch (error) {
       this.logger.error('Failed to parse Groq response:', text);
