@@ -6,6 +6,31 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  const allowedOrigins = (
+    process.env.CORS_ORIGINS?.split(',').map((origin) => origin.trim()) ?? [
+      'http://localhost:3000',
+      'https://mybufinder-app.vercel.app',
+    ]
+  )
+    .filter(Boolean)
+    .map((origin) => origin.replace(/\/$/, ''));
+
+  app.enableCors({
+    origin: (origin, callback) => {
+      if (!origin) {
+        callback(null, true);
+        return;
+      }
+
+      const normalizedOrigin = origin.replace(/\/$/, '');
+      callback(null, allowedOrigins.includes(normalizedOrigin));
+    },
+    credentials: true,
+    methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    optionsSuccessStatus: 204,
+  });
+
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -13,10 +38,6 @@ async function bootstrap() {
       transform: true,
     }),
   );
-
-const cors = require('cors');
-app.use(cors({ origin: ['http://localhost:3000', 'https://mybufinder-app.vercel.app/'] }));
-
 
   const config = new DocumentBuilder()
     .setTitle('BU Finder API')
