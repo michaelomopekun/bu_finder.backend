@@ -110,7 +110,7 @@ export class MatchingService {
     };
 
     const preFilterMatches = await this.itemsRepository.searchItems(searchParams);
-    const candidates = preFilterMatches.filter((match) => match.matchScore >= 0.1);
+    const candidates = preFilterMatches.filter((match) => match.matchScore >= 0.05);
 
     if (candidates.length === 0) {
       this.logger.log(`No candidates found for item ${itemId}`);
@@ -160,7 +160,7 @@ export class MatchingService {
       const batch = matchCandidates.slice(i, i + batchSize);
       const aiResults = await this.aiMatchingService.findMatches(sourceCandidate, batch);
 
-      for (const match of aiResults.filter((r) => r.score >= 0.4)) {
+      for (const match of aiResults.filter((r) => r.score >= 0.1)) {
         const matchedItem = candidates.find((c) => c.id === match.candidateId);
         if (matchedItem) {
           results.push({
@@ -184,7 +184,7 @@ export class MatchingService {
     candidates: (ItemData & { matchScore: number })[],
   ): MatchResultItem[] {
     return candidates
-      .filter((match) => match.matchScore >= 0.3)
+      .filter((match) => match.matchScore >= 0.1)
       .map((match) => ({
         item: match,
         score: match.matchScore,
@@ -192,7 +192,7 @@ export class MatchingService {
         matchMethod: 'fuzzy-similarity' as const,
         matchAreas: {
           title: true,
-          description: match.matchScore >= 0.5,
+          description: match.matchScore >= 0.1,
           category: false,
           location: false,
           image: false,
@@ -237,7 +237,7 @@ export class MatchingService {
       );
 
       // Filter for matches with AI confidence >= 0.1
-      const qualifiedMatches = aiResults.filter((r) => r.score >= 0.1);
+      const qualifiedMatches = aiResults.filter((r) => r.score >= 0.05);
 
       this.logger.log(
         `AI batch ${Math.floor(i / batchSize) + 1}: ${qualifiedMatches.length}/${batch.length} qualified matches`,
@@ -266,7 +266,7 @@ export class MatchingService {
     item: ItemData,
     candidates: (ItemData & { matchScore: number })[],
   ): Promise<void> {
-    const qualifiedMatches = candidates.filter((match) => match.matchScore >= 0.1);
+    const qualifiedMatches = candidates.filter((match) => match.matchScore >= 0.05);
 
     this.logger.log(
       `Similarity fallback: ${qualifiedMatches.length} matches for item ${item.id}`,
