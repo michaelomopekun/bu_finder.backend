@@ -25,8 +25,9 @@ export interface UserEmailVerification {
 export interface IAuthRepository {
     findByEmail(email: string): Promise<UserWithPassword | null>;
     findByUniversityId(universityId: string): Promise<UserResult | null>;
-    findById(userId: string): Promise<UserResult | null>;
+    findById(userId: string): Promise<UserWithPassword | null>;
     create(data: CreateUserData): Promise<UserEmailVerification>;
+    update(userId: string, data: Partial<CreateUserData>): Promise<void>;
     updateEmailVerificationStatus(userId: string, emailVerified: boolean): Promise<void>;
 }
 

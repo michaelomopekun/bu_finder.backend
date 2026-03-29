@@ -25,3 +25,23 @@ export class LoginResponseDto {
     accessToken: string;
   }
 }
+
+export class ResetPasswordDto {
+  @IsString()
+  @IsNotEmpty()
+  @ApiProperty({ example: 'password123', description: 'User password' })
+  currenPassword: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @ApiProperty({ example: 'password123', description: 'User password' })
+  password: string;
+}
+
+export class ResetPasswordResponseDto {
+  @ApiProperty({ example: responseStatus.SUCCESS, description: 'Response status' })
+  status: responseStatus;
+
+  @ApiProperty({ example: 'password reset successful', description: 'Response message' })
+  message: string;
+}

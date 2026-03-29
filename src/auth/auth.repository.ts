@@ -11,6 +11,7 @@ import {
   UserWithPassword,
   UserEmailVerification,
 } from './interfaces';
+import passport from 'passport';
 
 @Injectable()
 export class AuthRepository implements IAuthRepository {
@@ -18,6 +19,14 @@ export class AuthRepository implements IAuthRepository {
     @Inject(DRIZZLE)
     private readonly db: NodePgDatabase<typeof schema>,
   ) {}
+
+  async update(userId: string, data: Partial<CreateUserData>): Promise<void> {
+    await this.db
+      .update(users)
+      .set(data)
+      .where(eq(users.id, userId))
+      .then(() => {});
+  }
 
   async updateEmailVerificationStatus(userId: string, emailVerified: boolean): Promise<void> {
     await this.db
@@ -53,7 +62,7 @@ export class AuthRepository implements IAuthRepository {
     return user ?? null;
   }
 
-  async findById(userId: string): Promise<UserResult | null> {
+  async findById(userId: string): Promise<UserWithPassword | null> {
     const [user] = await this.db
       .select({
         id: users.id,
@@ -61,6 +70,7 @@ export class AuthRepository implements IAuthRepository {
         email: users.email,
         universityId: users.universityId,
         role: users.role,
+        password: users.password,
         createdAt: users.createdAt,
       })
       .from(users)

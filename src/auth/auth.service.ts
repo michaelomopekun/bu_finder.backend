@@ -8,8 +8,9 @@ import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { AUTH_REPOSITORY } from './interfaces';
 import type { AuthResponse, IAuthRepository } from './interfaces';
-import { RegisterDto, LoginDto } from './dto';
+import { RegisterDto, LoginDto, ResetPasswordDto, ResetPasswordResponseDto } from './dto';
 import { IAuthService } from './interfaces/auth-service.interface';
+import { responseStatus } from 'src/db/schema';
 
 @Injectable()
 export class AuthService implements IAuthService {
@@ -18,6 +19,30 @@ export class AuthService implements IAuthService {
     private readonly authRepository: IAuthRepository,
     private readonly jwtService: JwtService,
   ) {}
+
+  async resetPassword(userId: string, dto: ResetPasswordDto): Promise<ResetPasswordResponseDto> {
+    const user = await this.authRepository.findById(userId);
+    if (!user) {
+      throw new UnauthorizedException('User not found');
+    }
+    // Compare current password    
+    const isCurrentPasswordValid = await bcrypt.compare(dto.currenPassword, user.password);
+    if (!isCurrentPasswordValid) {
+      throw new UnauthorizedException('Invalid current password');
+    }
+
+    // Hash new password
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(dto.password, saltRounds);
+
+    // Update password
+    await this.authRepository.update(userId, { password: hashedPassword });
+
+    return {
+      status: responseStatus.SUCCESS,
+      message: 'Password reset successfully',
+    };
+  }
 
   async register(dto: RegisterDto): Promise<AuthResponse> {
     // Check if email already exists

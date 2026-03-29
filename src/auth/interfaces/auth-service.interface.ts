@@ -1,4 +1,4 @@
-import { RegisterDto, LoginDto } from '../dto';
+import { RegisterDto, LoginDto, ResetPasswordDto, ResetPasswordResponseDto } from '../dto';
 import { UserResult } from './auth-repository.interface';
 
 export interface AuthResponse {
@@ -13,4 +13,5 @@ export interface IAuthService {
   login(dto: LoginDto): Promise<AuthResponse>;
   adminLogin(dto: LoginDto): Promise<AuthResponse>;
   getProfile(userId: string): Promise<UserResult>;
+  resetPassword(userId: string, dto: ResetPasswordDto): Promise<ResetPasswordResponseDto>;
 }
