@@ -9,7 +9,7 @@ import {
   Inject,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
-import { RegisterDto, LoginDto, LoginResponseDto, RegisterResponseDto } from './dto';
+import { RegisterDto, LoginDto, LoginResponseDto, RegisterResponseDto, ResetPasswordResponseDto, ResetPasswordDto } from './dto';
 import { JwtAuthGuard } from './guards';
 import { CurrentUser } from './decorators';
 import { AUTH_SERVICE, type IAuthService } from './interfaces';
@@ -52,7 +52,21 @@ export class AuthController {
         accessToken: result.accessToken!,
       }
     };
-  }  
+  }
+
+  @Post('reset')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({summary: 'reset current user password'})
+  @ApiResponse({status: 200, description: 'password changed successfully', type: ResetPasswordResponseDto })
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  async resetPassword(@CurrentUser('id') userId: string, @Body() dto: ResetPasswordDto): Promise<ResetPasswordResponseDto> {
+    await this.authService.resetPassword(userId, dto);
+    return {
+      status: responseStatus.SUCCESS,
+      message: 'password reset successful',
+    };
+  }
   
 
   @Get('profile')
